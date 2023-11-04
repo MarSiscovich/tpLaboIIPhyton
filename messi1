@@ -1,0 +1,94 @@
+import pygame 
+import sys
+import random
+
+# Inicializo pygame
+pygame.init()
+
+# Creación de ventana
+ancho = 700
+alto = 300
+surface = pygame.display.set_mode((ancho, alto))  #ventana
+pygame.display.set_caption("Scaloneta") #titulo a ventana
+
+# RGB agrego los colores que necesite
+blanco = pygame.Color(255, 255, 255)
+azul = pygame.Color(59, 131, 189)
+rojo = pygame.Color(255, 0, 0)
+colores = pygame.Color(0, 130, 0)
+
+# Rectángulos Messi
+messi = pygame.Rect(50, 100, 25, 40)  #posX,posY, ancho, largo
+messi_color = azul
+
+#rectangulos con movimientos uso clase rect si no se mueven uso tupla 
+# Suelo
+suelo = pygame.Rect(0, 150, ancho, 30)
+
+# Rectángulos de oponentes
+oponentes = []
+
+# Configuración del juego
+gravedad = 1
+salta = -35
+saltando = False
+puntos = 0
+font = pygame.font.Font(None, 36) #se utiliza para crear una instancia de una 
+#fuente de texto que se puede utilizar para renderizar texto en la pantalla del juego
+
+# Función para crear oponentes
+def crear_oponente():
+    oponente = pygame.Rect(ancho, 140, 10, 10)
+    oponentes.append(oponente)
+
+# Bucle principal del juego
+clock = pygame.time.Clock()
+corriendo = True
+en_el_aire = False  # Agrego una bandera para controlar el salto
+while corriendo:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            corriendo = False
+
+    tecla = pygame.key.get_pressed()
+    if tecla[pygame.K_SPACE] and not en_el_aire:  # Salto solo si no está en el aire
+        saltando = True
+        messi.y += salta
+        en_el_aire = True
+
+    if saltando:
+        messi.y += gravedad
+        if messi.colliderect(suelo):
+            messi.y = 100
+            saltando = False
+            en_el_aire = False
+
+    # Mover oponentes
+    for oponente in oponentes[:]:
+        oponente.x -= 5
+        if oponente.colliderect(messi):
+            corriendo = False
+        if oponente.right < 0:
+            oponentes.remove(oponente)
+            puntos += 1
+
+    # Crear nuevos oponentes
+    if random.randint(1, 70) == 1:   #es una condición que se evalúa para determinar si se
+        #debe crear un nuevo oponente en el juego. En este caso, se está utilizando una probabilidad de 1/70
+        crear_oponente()
+
+    surface.fill(colores)
+    pygame.draw.rect(surface, messi_color, messi)
+    pygame.draw.rect(surface, rojo, suelo)
+    for oponente in oponentes:
+        pygame.draw.rect(surface, blanco, oponente)
+
+    # Mostrar puntuación
+    puntuacion = font.render(f"Puntos: {puntos}", True, rojo)
+    surface.blit(puntuacion, (10, 10))
+
+    pygame.display.update()
+    clock.tick(30) # la ejecución del juego a un máximo de 30 FPS
+
+pygame.quit()
+sys.exit()

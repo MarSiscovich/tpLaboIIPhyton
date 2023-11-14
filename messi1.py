@@ -6,10 +6,10 @@ import random
 pygame.init()
 
 # Creación de ventana
-ancho = 800
-alto = 300
-surface = pygame.display.set_mode((ancho, alto))  #ventana
-pygame.display.set_caption("Scaloneta") #titulo a ventana
+ancho = 1100
+alto = 600
+surface = pygame.display.set_mode((ancho, alto))  # ventana
+pygame.display.set_caption("Scaloneta")  # titulo a ventana
 
 # RGB agrego los colores que necesite
 rojo = pygame.Color(255, 0, 0)
@@ -17,77 +17,86 @@ azul = pygame.Color(0, 154, 255)
 blanco = pygame.Color(255, 255, 255)
 verde = pygame.Color(10, 130, 0)
 
-# Rectángulos Messi
-messi = pygame.Rect(50, 100, 25, 40)  #posX,posY, ancho, largo
-messi_color = azul
+# Cargar imagen de fondo
+fondo = pygame.image.load("back.png")
+fondo = pygame.transform.scale(fondo, (ancho, alto))
 
-#rectangulos con movimientos uso clase rect si no se mueven uso tupla 
+# Cargar imagen Messi
+messi = pygame.image.load("messiRun.png")
+messi = pygame.transform.scale(messi, (180, 200))
+
+# Posicion inicial de Messi
+messiX = 50
+messiY = 270
+
+# Rectángulos con movimientos uso clase rect si no se mueven uso tupla
 # Suelo
-suelo = pygame.Rect(0, 150, ancho, 20)
+suelo = pygame.Rect(0, 450, ancho, 15)
 
 # Rectángulos de oponentes
 oponentes = []
 
 # Configuración del juego
-gravedad = 4     
-salta = -60
+gravedad = 1.5
+salta = -20
 saltando = False
 puntos = 0
-font = pygame.font.Font(None, 36) #se utiliza para crear una instancia de una 
-#fuente de texto que se puede utilizar para renderizar texto en la pantalla del juego
+font = pygame.font.Font(None, 36)  # fuente de texto
 
 # Función para crear oponentes
 def crear_oponente():
-    oponente = pygame.Rect(ancho, 130, 15, 20)
+    oponente = pygame.Rect(ancho, 430, 15, 20)
     oponentes.append(oponente)
 
 # Bucle principal del juego
 clock = pygame.time.Clock()
 corriendo = True
 en_el_aire = False  # Agrego una bandera para controlar el salto
+
 while corriendo:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             corriendo = False
 
     tecla = pygame.key.get_pressed()
-    if tecla[pygame.K_SPACE] and not en_el_aire:  # Salto solo si no está en el aire
+    if tecla[pygame.K_SPACE] and not saltando:
         saltando = True
-        messi.y += salta
         en_el_aire = True
 
     if saltando:
-        messi.y += gravedad
-        if messi.colliderect(suelo):
-            messi.y = 100
+        messiY += salta
+        salta += gravedad
+        if messiY >= 270:
+            messiY = 270
+            salta = -20
             saltando = False
             en_el_aire = False
 
     # Mover oponentes
     for oponente in oponentes[:]:
         oponente.x -= 5
-        if oponente.colliderect(messi):
+        if oponente.colliderect(messiX, messiY, 25, 40):
             corriendo = False
         if oponente.right < 0:
             oponentes.remove(oponente)
             puntos += 1
 
     # Crear nuevos oponentes
-    if random.randint(1, 95) == 1:   #es una condición que se evalúa para determinar si se
-        #debe crear un nuevo oponente en el juego. En este caso, se está utilizando una probabilidad de 1/70
+    if random.randint(1, 95) == 1:
         crear_oponente()
 
-    surface.fill(verde)
-    pygame.draw.rect(surface, messi_color, messi)
+    surface.blit(fondo, (0, 0))
+    surface.blit(messi, (messiX, messiY))
     pygame.draw.rect(surface, blanco, suelo)
     for oponente in oponentes:
         pygame.draw.rect(surface, rojo, oponente)
 
     # Mostrar puntuación
     puntuacion = font.render(f"Puntos: {puntos}", True, blanco)
-    surface.blit(puntuacion, (10, 10))
+    surface.blit(puntuacion, (10, 560))
 
-    pygame.display.update()
-    clock.tick(30) # la ejecución del juego a un máximo de 30 FPS
+    pygame.display.flip()
+    clock.tick(30)  # la ejecución del juego a un máximo de 30 FPS
+
 pygame.quit()
 sys.exit()

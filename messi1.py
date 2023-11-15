@@ -23,11 +23,11 @@ fondo = pygame.transform.scale(fondo, (ancho, alto))
 
 # Cargar imagen Messi
 messi = pygame.image.load("pics/messiRun.png")
-messi = pygame.transform.scale(messi, (180, 200))
+messi = pygame.transform.scale(messi, (90, 100))
 
 # Posicion inicial de Messi
 messiX = 50
-messiY = 270
+messiY = 350
 
 # Rectángulos con movimientos uso clase rect si no se mueven uso tupla
 # Suelo
@@ -37,8 +37,8 @@ suelo = pygame.Rect(0, 450, ancho, 15)
 oponentes = []
 
 # Configuración del juego
-gravedad = 1.5
-salta = -20
+gravedad = 0.75 
+salta = -10  
 saltando = False
 puntos = 0
 font = pygame.font.Font(None, 36)  # fuente de texto
@@ -48,12 +48,19 @@ def crear_oponente():
     oponente = pygame.Rect(ancho, 430, 15, 20)
     oponentes.append(oponente)
 
+velocidad_oponentes = 10  # Velocidad inicial de los oponentes
+tiempo_juego = 0  # Tiempo transcurrido en el juego
+
 # Bucle principal del juego
 clock = pygame.time.Clock()
 corriendo = True
 en_el_aire = False  # Agrego una bandera para controlar el salto
+fin_del_juego = False
+
 
 while corriendo:
+    tiempo_juego += clock.get_time()
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             corriendo = False
@@ -66,24 +73,57 @@ while corriendo:
     if saltando:
         messiY += salta
         salta += gravedad
-        if messiY >= 270:
-            messiY = 270
-            salta = -20
+        if messiY >= 350:
+            messiY = 350
+            salta = -10
             saltando = False
             en_el_aire = False
 
+    # Crear un rectángulo para Messi
+    rect_messi = pygame.Rect(messiX, messiY, 90, 100)  # Asumiendo que 180x200 es el tamaño de Messi
+
     # Mover oponentes
     for oponente in oponentes[:]:
-        oponente.x -= 5
-        if oponente.colliderect(messiX, messiY, 25, 40):
-            corriendo = False
+        oponente.x -= velocidad_oponentes
+        if oponente.x < 10:
+            ultimo_oponente_x = oponente.x
+        if rect_messi.colliderect(oponente):
+            fin_del_juego = True
         if oponente.right < 0:
             oponentes.remove(oponente)
             puntos += 1
 
-    # Crear nuevos oponentes
+    # Aumentar la velocidad de los oponentes con el tiempo
+    if tiempo_juego > 6000:  # Por ejemplo, cada 6 segundos
+        velocidad_oponentes += 1  # Aumenta la velocidad
+        tiempo_juego = 0  # Restablece el contador de tiempo 
+
+       # Crear nuevos oponentes
     if random.randint(1, 95) == 1:
         crear_oponente()
+
+    if fin_del_juego:
+        # Mostrar mensaje de fin de juego
+        mensaje_fin = font.render("Fin del Juego - Presiona R para Reiniciar", True, blanco)
+        surface.blit(mensaje_fin, (ancho // 2 - mensaje_fin.get_width() // 2, alto // 2 - mensaje_fin.get_height() // 2))
+        pygame.display.flip()
+
+    # Esperar acción del jugador
+        esperando_accion = True
+        while esperando_accion:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    corriendo = False
+                    esperando_accion = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        esperando_accion = False
+                        fin_del_juego = False
+                        # Reiniciar el juego (reiniciar variables, etc.)
+                        messiX, messiY = 50, 350  # Restablecer posición de Messi
+                        oponentes.clear()  # Limpiar lista de oponentes
+                        puntos = 0  # Restablecer puntos
+                        saltando = False  # Restablecer estado de salto 
 
     surface.blit(fondo, (0, 0))
     surface.blit(messi, (messiX, messiY))

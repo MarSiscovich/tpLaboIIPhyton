@@ -18,11 +18,11 @@ blanco = pygame.Color(255, 255, 255)
 verde = pygame.Color(10, 130, 0)
 
 # Cargar imagen de fondo
-fondo = pygame.image.load("back.png")
+fondo = pygame.image.load("pics/back.png")
 fondo = pygame.transform.scale(fondo, (ancho, alto))
 
 # Cargar imagen Messi
-messi = pygame.image.load("messiRun.png")
+messi = pygame.image.load("pics/messiRun.png")
 messi = pygame.transform.scale(messi, (180, 200))
 
 # Posicion inicial de Messi

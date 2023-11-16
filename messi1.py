@@ -2,73 +2,56 @@ import pygame
 import sys
 import random
 
-# Inicializo pygame
-pygame.init()
-
-# Creación de ventana
-ancho = 1100
-alto = 600
-surface = pygame.display.set_mode((ancho, alto))  # ventana
-pygame.display.set_caption("Scaloneta")  # titulo a ventana
-
-# RGB agrego los colores que necesite
-rojo = pygame.Color(255, 0, 0)
-azul = pygame.Color(0, 154, 255)
-blanco = pygame.Color(255, 255, 255)
-verde = pygame.Color(10, 130, 0)
-
-# Cargar imagen de fondo
-fondo = pygame.image.load("pics/back.png")
-fondo = pygame.transform.scale(fondo, (ancho, alto))
-
-# Cargar imagen Messi
-messi = pygame.image.load("pics/messiRun.png")
-messi = pygame.transform.scale(messi, (90, 100))
-
-# Posicion inicial de Messi
+# variables globales
+ANCHO = 1100
+ALTO = 600
+ROJO = pygame.Color(255, 0, 0)
+AZUL = pygame.Color(0, 154, 255)
+BLANCO = pygame.Color(255, 255, 255)
+VERDE = pygame.Color(10, 130, 0)
 messiX = 50
 messiY = 350
-
-# Rectángulos con movimientos uso clase rect si no se mueven uso tupla
-# Suelo
-suelo = pygame.Rect(0, 450, ancho, 15)
-
-# Rectángulos de oponentes
+suelo = pygame.Rect(0, 450, ANCHO, 15)
 oponentes = []
-
-# Configuración del juego
-gravedad = 0.75 
-salta = -10  
+gravedad = 0.75
+salta = -10
 saltando = False
 puntos = 0
-font = pygame.font.Font(None, 36)  # fuente de texto
+velocidadOponentes = 10
+tiempoJuego = 0
+corriendo = True
+enElAire = False
+finDelJuego = False
+ultimoOponenteX = 0 
 
-# Función para crear oponentes
-def crear_oponente():
-    oponente = pygame.Rect(ancho, 430, 15, 20)
+
+def inicializoJuego(): #funcion inicializar juego
+    pygame.init()
+    surface = pygame.display.set_mode((ANCHO, ALTO))
+    clock = pygame.time.Clock()
+    font = pygame.font.Font(None, 36)
+    return surface, clock, font
+
+def cargoImagen(ruta, dimensiones): #funcion cargar imagen y la dimension
+    imagen = pygame.image.load(ruta)
+    return pygame.transform.scale(imagen, dimensiones)
+
+def creoOponente(oponentes): #funcion crear oponentes
+    oponente = pygame.Rect(ANCHO, 430, 15, 20)
     oponentes.append(oponente)
 
-velocidad_oponentes = 10  # Velocidad inicial de los oponentes
-tiempo_juego = 0  # Tiempo transcurrido en el juego
-
-# Bucle principal del juego
-clock = pygame.time.Clock()
-corriendo = True
-en_el_aire = False  # Agrego una bandera para controlar el salto
-fin_del_juego = False
-
-
-while corriendo:
-    tiempo_juego += clock.get_time()
-    
+def manejoEvento(): #funcion manejar eventos
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            corriendo = False
+            return True
+    return False
 
+def manejoSalto(): #funcion de salto
+    global saltando, enElAire, messiY, salta
     tecla = pygame.key.get_pressed()
     if tecla[pygame.K_SPACE] and not saltando:
         saltando = True
-        en_el_aire = True
+        enElAire = True
 
     if saltando:
         messiY += salta
@@ -77,66 +60,102 @@ while corriendo:
             messiY = 350
             salta = -10
             saltando = False
-            en_el_aire = False
+            enElAire = False
 
-    # Crear un rectángulo para Messi
-    rect_messi = pygame.Rect(messiX, messiY, 90, 100)  # Asumiendo que 180x200 es el tamaño de Messi
+def moverOponentes():  #funcion que mueve los oponentes
+    global finDelJuego, puntos, velocidadOponentes, tiempoJuego, ultimoOponenteX
+    rectMessi = pygame.Rect(messiX, messiY, 90, 100)
 
-    # Mover oponentes
     for oponente in oponentes[:]:
-        oponente.x -= velocidad_oponentes
+        oponente.x -= velocidadOponentes
         if oponente.x < 10:
-            ultimo_oponente_x = oponente.x
-        if rect_messi.colliderect(oponente):
-            fin_del_juego = True
+            ultimoOponenteX = oponente.x
+        if rectMessi.colliderect(oponente):
+            finDelJuego = True
         if oponente.right < 0:
             oponentes.remove(oponente)
             puntos += 1
 
-    # Aumentar la velocidad de los oponentes con el tiempo
-    if tiempo_juego > 6000:  # Por ejemplo, cada 6 segundos
-        velocidad_oponentes += 1  # Aumenta la velocidad
-        tiempo_juego = 0  # Restablece el contador de tiempo 
+    if tiempoJuego > 6000:
+        velocidadOponentes += 1
+        tiempoJuego = 0
 
-       # Crear nuevos oponentes
     if random.randint(1, 95) == 1:
-        crear_oponente()
+        creoOponente(oponentes)
 
-    if fin_del_juego:
-        # Mostrar mensaje de fin de juego
-        mensaje_fin = font.render("Fin del Juego - Presiona R para Reiniciar", True, blanco)
-        surface.blit(mensaje_fin, (ancho // 2 - mensaje_fin.get_width() // 2, alto // 2 - mensaje_fin.get_height() // 2))
-        pygame.display.flip()
-
-    # Esperar acción del jugador
-        esperando_accion = True
-        while esperando_accion:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    corriendo = False
-                    esperando_accion = False
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:
-                        esperando_accion = False
-                        fin_del_juego = False
-                        # Reiniciar el juego (reiniciar variables, etc.)
-                        messiX, messiY = 50, 350  # Restablecer posición de Messi
-                        oponentes.clear()  # Limpiar lista de oponentes
-                        puntos = 0  # Restablecer puntos
-                        saltando = False  # Restablecer estado de salto 
-
+def mostrarPantalla(surface, fondo, messi, suelo, font): #funcion para mostrar en pantalla
     surface.blit(fondo, (0, 0))
     surface.blit(messi, (messiX, messiY))
-    pygame.draw.rect(surface, blanco, suelo)
+    pygame.draw.rect(surface, BLANCO, suelo)
     for oponente in oponentes:
-        pygame.draw.rect(surface, rojo, oponente)
+        pygame.draw.rect(surface, ROJO, oponente)
 
-    # Mostrar puntuación
-    puntuacion = font.render(f"Puntos: {puntos}", True, blanco)
+    puntuacion = font.render(f"Puntos: {puntos}", True, BLANCO)
     surface.blit(puntuacion, (10, 560))
 
-    pygame.display.flip()
-    clock.tick(30)  # la ejecución del juego a un máximo de 30 FPS
+def reiniciarJuego():  #funcion reinicio el juego
+    global messiX, messiY, suelo, oponentes, gravedad, salta, saltando, puntos, velocidadOponentes, tiempoJuego, corriendo, enElAire, finDelJuego
 
-pygame.quit()
+    messiX = 50
+    messiY = 350
+    suelo = pygame.Rect(0, 450, ANCHO, 15)
+    oponentes = []
+    gravedad = 0.75
+    salta = -10
+    saltando = False
+    puntos = 0
+    velocidadOponentes = 10
+    tiempoJuego = 0
+    corriendo = True
+    enElAire = False
+    finDelJuego = False
+    ultimoOponenteX = 0  # Agregar esta línea para inicializar la variable
+
+def main():
+    global messiX, messiY, suelo, oponentes, gravedad, salta, saltando, puntos, velocidadOponentes, tiempoJuego, corriendo, enElAire, finDelJuego, ultimoOponenteX
+
+    surface, clock, font = inicializoJuego()
+    pygame.display.set_caption("Scaloneta")  # título a ventana
+
+    fondo = cargoImagen("pics/back.png", (ANCHO, ALTO))
+    messi = cargoImagen("pics/messiRun.png", (90, 100))
+
+    while corriendo:
+        tiempoJuego += clock.get_time()
+
+        if manejoEvento():
+            corriendo = False
+
+        manejoSalto()
+        moverOponentes()
+
+        if finDelJuego:
+            mensajeFin = font.render("Fin del Juego - Presiona R para Reiniciar", True, BLANCO)
+            surface.blit(mensajeFin, (ANCHO // 2 - mensajeFin.get_width() // 2, ALTO // 2 - mensajeFin.get_height() // 2))
+            pygame.display.flip()
+
+            esperandoAccion = True
+            while esperandoAccion:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        corriendo = False
+                        esperandoAccion = False
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_r:
+                            esperandoAccion = False
+                            finDelJuego = False
+                            reiniciarJuego()
+
+        mostrarPantalla(surface, fondo, messi, suelo, font)
+
+        pygame.display.flip()
+        clock.tick(30)
+
+    pygame.quit()
+    sys.exit()
+
+# Iniciar el juego
+if __name__ == "__main__":
+    main()
+
 sys.exit()

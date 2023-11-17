@@ -13,7 +13,7 @@ BLANCO = pygame.Color(255, 255, 255)
 VERDE = pygame.Color(10, 130, 0)
 messiX = 50
 messiY = 350
-suelo = pygame.Rect(0, 450, ANCHO, 15)
+suelo = pygame.Rect(0, 450, ANCHO, 0)
 oponentes = []
 gravedad = 0.75
 salta = -10
@@ -25,24 +25,32 @@ corriendo = True
 enElAire = False
 finDelJuego = False
 ultimoOponenteX = 0
-
+# Definición global de cargoImagen
+def cargoImagen(ruta, dimensiones):
+    imagen = pygame.image.load(ruta)
+    return pygame.transform.scale(imagen, dimensiones)
+ 
 def jugar(pantalla):
-    while True:
+    # Cargar imágenes de oponentes
+    ruta_imagenes_oponentes = ["pics/mbappe.png", "pics/brasil.png", "pics/francia.png"]
+    imagenes_oponentes = [cargoImagen(ruta, (50, 50)) for ruta in ruta_imagenes_oponentes]
 
+    while True:
+        # Resto de tu código
         def inicializoJuego(): #funcion inicializar juego
             pygame.init()
             surface = pygame.display.set_mode((ANCHO, ALTO))
             clock = pygame.time.Clock()
             font = pygame.font.Font(None, 36)
             return surface, clock, font
-
-        def cargoImagen(ruta, dimensiones): #funcion cargar imagen y la dimension
-            imagen = pygame.image.load(ruta)
-            return pygame.transform.scale(imagen, dimensiones)
-
-        def creoOponente(oponentes): #funcion crear oponentes
-            oponente = pygame.Rect(ANCHO, 430, 15, 20)
-            oponentes.append(oponente)
+        
+        def creoOponente(oponentes):
+            indice_imagen = random.randint(0, len(imagenes_oponentes) - 1)
+            oponente = {
+                "rect": pygame.Rect(ANCHO, 430, 15, 20),
+                "imagen": indice_imagen
+            }
+            oponentes.append(oponente)  # Esta línea debe estar dentro de la función creoOponente
 
         def manejoEvento(): #funcion manejar eventos
             for event in pygame.event.get():
@@ -66,17 +74,17 @@ def jugar(pantalla):
                     saltando = False
                     enElAire = False
 
-        def moverOponentes():  #funcion que mueve los oponentes
+        def moverOponentes():  # Función que mueve los oponentes
             global finDelJuego, puntos, velocidadOponentes, tiempoJuego, ultimoOponenteX
             rectMessi = pygame.Rect(messiX, messiY, 90, 100)
 
             for oponente in oponentes[:]:
-                oponente.x -= velocidadOponentes
-                if oponente.x < 10:
-                    ultimoOponenteX = oponente.x
-                if rectMessi.colliderect(oponente):
+                oponente['rect'].x -= velocidadOponentes  # Acceder al rectángulo del oponente
+                if oponente['rect'].x < 10:
+                    ultimoOponenteX = oponente['rect'].x
+                if rectMessi.colliderect(oponente['rect']):  # Acceder al rectángulo para la colisión
                     finDelJuego = True
-                if oponente.right < 0:
+                if oponente['rect'].right < 0:  # Acceder al rectángulo para verificar la posición
                     oponentes.remove(oponente)
                     puntos += 1
 
@@ -87,12 +95,13 @@ def jugar(pantalla):
             if random.randint(1, 95) == 1:
                 creoOponente(oponentes)
 
-        def mostrarPantalla(surface, fondo, messi, suelo, font): #funcion para mostrar en pantalla
+        def mostrarPantalla(surface, fondo, messi, suelo, font):
             surface.blit(fondo, (0, 0))
             surface.blit(messi, (messiX, messiY))
             pygame.draw.rect(surface, BLANCO, suelo)
             for oponente in oponentes:
-                pygame.draw.rect(surface, ROJO, oponente)
+                imagen_oponente = imagenes_oponentes[oponente["imagen"]]
+                surface.blit(imagen_oponente, oponente["rect"].topleft)
 
             puntuacion = font.render(f"Puntos: {puntos}", True, BLANCO)
             surface.blit(puntuacion, (10, 675))

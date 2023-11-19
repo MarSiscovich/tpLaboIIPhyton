@@ -12,7 +12,7 @@ AZUL = pygame.Color(0, 154, 255)
 BLANCO = pygame.Color(255, 255, 255)
 VERDE = pygame.Color(10, 130, 0)
 messiX = 50
-messiY = 350
+messiY = 310
 suelo = pygame.Rect(0, 450, ANCHO, 0)
 oponentes = []
 gravedad = 0.75
@@ -47,7 +47,7 @@ def jugar(pantalla):
         def creoOponente(oponentes):
             indice_imagen = random.randint(0, len(imagenes_oponentes) - 1)
             oponente = {
-                "rect": pygame.Rect(ANCHO, 430, 15, 20),
+                "rect": pygame.Rect(ANCHO, 400, 15, 20),
                 "imagen": indice_imagen
             }
             oponentes.append(oponente)  # Esta línea debe estar dentro de la función creoOponente
@@ -68,8 +68,8 @@ def jugar(pantalla):
             if saltando:
                 messiY += salta
                 salta += gravedad
-                if messiY >= 350:
-                    messiY = 350
+                if messiY >= 310:
+                    messiY = 310
                     salta = -10
                     saltando = False
                     enElAire = False
@@ -110,7 +110,7 @@ def jugar(pantalla):
             global messiX, messiY, suelo, oponentes, gravedad, salta, saltando, puntos, velocidadOponentes, tiempoJuego, corriendo, enElAire, finDelJuego,ultimoOponenteX
 
             messiX = 50
-            messiY = 350
+            messiY = 310
             suelo = pygame.Rect(0, 450, ANCHO, 15)
             oponentes = []
             gravedad = 0.75
@@ -131,7 +131,8 @@ def jugar(pantalla):
             pygame.display.set_caption("JUEGO Scaloneta")  # título a ventana
 
             fondo = cargoImagen("pics/back.png", (ANCHO, ALTO))
-            messi = cargoImagen("pics/messiRun.png", (90, 100))
+            messi = cargoImagen("pics/messiRun.png", (150, 160))
+            suelo = pygame.Rect(0, 450, ANCHO, 15)
 
             while corriendo:
                 tiempoJuego += clock.get_time()
@@ -143,9 +144,33 @@ def jugar(pantalla):
                 moverOponentes()
 
                 if finDelJuego:
+
                     posiciones_raton = pygame.mouse.get_pos()
-                    mensajeFin = font.render("Fin del Juego - Presiona R para Reiniciar", True, BLANCO)
-                    surface.blit(mensajeFin, (ANCHO // 2 - mensajeFin.get_width() // 2, ALTO // 2 - mensajeFin.get_height() // 2))
+
+                    textoGameOver = obtener_fuente(90).render("GAME OVER", True, "#b68f40")
+                    rectGameOver = textoGameOver.get_rect(center=(640, 100))
+                    pantalla.blit(textoGameOver, rectGameOver)
+
+                    reinicio = obtener_fuente(25).render("PULSE R PARA REINICIAR", True, "#b68f40")
+                    rectReinicio = reinicio.get_rect(center=(640,200))
+                    pantalla.blit(reinicio, rectReinicio)
+
+                    mensajePuntuacion = obtener_fuente(15).render(f"Puntuación Final: {puntos}", True, "#b68f40")
+                    x_pos = ANCHO // 2 - mensajePuntuacion.get_width() // 2
+                    y_pos = 250
+                    surface.blit(mensajePuntuacion, (x_pos, y_pos))
+
+                    """
+                    botonVolverJuego = Boton(imagen=None, posicion=(640, 650), 
+                                                entrada_texto="BACK TO MENU", fuente=obtener_fuente(50), color_base="#b68f40", color_hover="Black")
+
+                    botonVolverJuego.cambiar_color(posiciones_raton)
+                    botonVolverJuego.actualizar(pantalla)
+
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if botonVolverJuego.verificar_entrada(posiciones_raton):
+                            return  
+                    """
                     pygame.display.flip()
 
                     esperandoAccion = True
@@ -245,4 +270,3 @@ def menu_principal():
         pygame.display.update()
 
 menu_principal()
-

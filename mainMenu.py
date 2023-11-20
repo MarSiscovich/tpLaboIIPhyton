@@ -39,7 +39,7 @@ def cargoImagen(ruta, dimensiones):
  
 def jugar(pantalla):
     # Cargar imágenes de oponentes
-    ruta_imagenes_oponentes = ["pics/mbappe.png", "pics/brasil.png", "pics/francia.png"]
+    ruta_imagenes_oponentes = ["pics/mbappe.png", "pics/brasil.png", "pics/francia.png", "pics/arabia.png", "pics/australia.png", "pics/croacia.png", "pics/holanda.png", "pics/mexico.png", "pics/polonia.png"]
     imagenes_oponentes = [cargoImagen(ruta, (50, 50)) for ruta in ruta_imagenes_oponentes]
 
     
@@ -105,7 +105,7 @@ def jugar(pantalla):
                 velocidadOponentes += 1
                 tiempoJuego = 0
 
-            if random.randint(1, 95) == 1:
+            if random.randint(1, 90) == 1:
                 creoOponente(oponentes, ultimoOponenteX)
 
         def mostrarPantalla(surface, fondo, messi, suelo, font):

@@ -6,4 +6,3 @@ Actualicé los cuadraditos, ahora son oponentes.
 - Mejorar gráfico del fondo
 - Agregar música
 - Agregar pantalla de victoria
-- Agregar pantalla de game over

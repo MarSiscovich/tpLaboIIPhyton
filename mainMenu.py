@@ -15,8 +15,8 @@ messiX = 50
 messiY = 310
 suelo = pygame.Rect(0, 450, ANCHO, 0)
 oponentes = []
-gravedad = 0.75
-salta = -10
+gravedad = 0.80
+salta = -15
 saltando = False
 puntos = 0
 velocidadOponentes = 10
@@ -44,13 +44,15 @@ def jugar(pantalla):
             font = pygame.font.Font(None, 36)
             return surface, clock, font
         
-        def creoOponente(oponentes):
+        def creoOponente(oponentes, ultimoOponenteX):
             indice_imagen = random.randint(0, len(imagenes_oponentes) - 1)
+            nueva_posicion_x = max(ultimoOponenteX + 200, ANCHO - 15)
             oponente = {
                 "rect": pygame.Rect(ANCHO, 400, 15, 20),
                 "imagen": indice_imagen
             }
             oponentes.append(oponente)  # Esta línea debe estar dentro de la función creoOponente
+            ultimoOponenteX = nueva_posicion_x
 
         def manejoEvento(): #funcion manejar eventos
             for event in pygame.event.get():
@@ -70,7 +72,7 @@ def jugar(pantalla):
                 salta += gravedad
                 if messiY >= 310:
                     messiY = 310
-                    salta = -10
+                    salta = -15
                     saltando = False
                     enElAire = False
 
@@ -92,8 +94,8 @@ def jugar(pantalla):
                 velocidadOponentes += 1
                 tiempoJuego = 0
 
-            if random.randint(1, 95) == 1:
-                creoOponente(oponentes)
+            if random.randint(1, 97) == 1:
+                creoOponente(oponentes, ultimoOponenteX)
 
         def mostrarPantalla(surface, fondo, messi, suelo, font):
             surface.blit(fondo, (0, 0))
@@ -113,8 +115,8 @@ def jugar(pantalla):
             messiY = 310
             suelo = pygame.Rect(0, 450, ANCHO, 15)
             oponentes = []
-            gravedad = 0.75
-            salta = -10
+            gravedad = 0.80
+            salta = -15
             saltando = False
             puntos = 0
             velocidadOponentes = 10

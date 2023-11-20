@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import pygame.mixer
 
 from libreria import Boton, obtener_fuente
 
@@ -25,6 +26,12 @@ corriendo = True
 enElAire = False
 finDelJuego = False
 ultimoOponenteX = 0
+
+#Cargo las canciones
+pygame.mixer.init()
+cancion_menu = pygame.mixer.Sound("assets/Marito-Muchachos_-ahora-solo-queda-festejar-_Ya-Somos-Campeon-Mundial_.wav")  
+cancion_juego = pygame.mixer.Sound("assets/Hora-de-Entrenar-Música-para-el-Deporte.wav")  
+
 # Definición global de cargoImagen
 def cargoImagen(ruta, dimensiones):
     imagen = pygame.image.load(ruta)
@@ -34,6 +41,10 @@ def jugar(pantalla):
     # Cargar imágenes de oponentes
     ruta_imagenes_oponentes = ["pics/mbappe.png", "pics/brasil.png", "pics/francia.png"]
     imagenes_oponentes = [cargoImagen(ruta, (50, 50)) for ruta in ruta_imagenes_oponentes]
+
+    
+    #Cancion del juego
+    cancion_juego.play(loops=-1)
 
     while True:
         # Resto de tu código
@@ -94,7 +105,7 @@ def jugar(pantalla):
                 velocidadOponentes += 1
                 tiempoJuego = 0
 
-            if random.randint(1, 97) == 1:
+            if random.randint(1, 95) == 1:
                 creoOponente(oponentes, ultimoOponenteX)
 
         def mostrarPantalla(surface, fondo, messi, suelo, font):
@@ -192,6 +203,7 @@ def jugar(pantalla):
                 pygame.display.flip()
                 clock.tick(30)
 
+            pygame.mixer.stop()
             pygame.quit()
             sys.exit()
 
@@ -201,6 +213,7 @@ def jugar(pantalla):
 
         
         pygame.display.update()
+
 
 def opciones(pantalla):
     while True:
@@ -220,6 +233,7 @@ def opciones(pantalla):
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.stop()
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -234,6 +248,9 @@ def menu_principal():
     pygame.display.set_caption("Menú SCALONETA")
 
     fondo = pygame.image.load("assets/Background.png")
+
+    #Cancion del menu
+    cancion_menu.play(loops=-1)
 
     while True:
         pantalla.blit(fondo, (0, 0))
@@ -258,14 +275,17 @@ def menu_principal():
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.stop()
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if boton_jugar.verificar_entrada(posiciones_raton):
-                    jugar(pantalla)
+                   pygame.mixer.stop() 
+                   jugar(pantalla)
                 if boton_opciones.verificar_entrada(posiciones_raton):
                     opciones(pantalla)
                 if boton_salir.verificar_entrada(posiciones_raton):
+                    pygame.mixer.stop()
                     pygame.quit()
                     sys.exit()
 

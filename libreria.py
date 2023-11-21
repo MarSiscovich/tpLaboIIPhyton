@@ -1,4 +1,7 @@
 import pygame
+import cv2
+
+from time import sleep
 
 class Boton():
     def __init__(self, imagen, posicion, entrada_texto, fuente, color_base, color_hover):
@@ -33,3 +36,17 @@ class Boton():
 def obtener_fuente(tamano):
     return pygame.font.Font("assets/font.ttf", tamano)
 
+def reproducir_video():
+    cap = cv2.VideoCapture("pics/videoCopa.mp4")
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        cv2.imshow("GANASTE", frame)
+        if cv2.waitKey(30) & 0xFF == 27: 
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()

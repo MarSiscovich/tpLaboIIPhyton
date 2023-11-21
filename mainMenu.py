@@ -171,7 +171,15 @@ def jugar(pantalla):
             reproducir_video()
 
             esperandoAccion = True
+            
             while esperandoAccion:
+                
+                posiciones_raton = pygame.mouse.get_pos()
+                boton_volver = Boton(imagen=None, posicion=(640, 650), entrada_texto="BACK TO MENU", fuente=obtener_fuente(50), color_base="WHITE", color_hover="BLACK")
+                boton_volver.cambiar_color(posiciones_raton)
+                boton_volver.actualizar(pantalla)
+                pygame.display.update()
+                
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         corriendo = False
@@ -183,7 +191,9 @@ def jugar(pantalla):
                             reiniciarJuego()
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if boton_volver.verificar_entrada(posiciones_raton):
-                            menu_principal(pantalla)
+                            menu_principal()
+                            
+            pygame.display.update()
 
         def perder_y_reiniciar(surface):
             global finDelJuego, corriendo, puntos
@@ -220,6 +230,14 @@ def jugar(pantalla):
 
             esperandoAccion = True
             while esperandoAccion:
+                
+            posiciones_raton = pygame.mouse.get_pos()     
+            boton_volver = Boton(imagen=None, posicion=(640, 650),
+                                entrada_texto="BACK TO MENU", fuente=obtener_fuente(50), color_base="WHITE", color_hover="BLACK")
+            boton_volver.cambiar_color(posiciones_raton)
+            boton_volver.actualizar(surface)
+            pygame.display.update()
+            
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         corriendo = False
@@ -231,7 +249,7 @@ def jugar(pantalla):
                             reiniciarJuego()
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if boton_volver.verificar_entrada(posiciones_raton):
-                            menu_principal(pantalla)
+                            menu_principal()
 
         def mostrar_instrucciones():
             instrucciones = ["AYUDA A MESSI A GANAR LA COPA","Salta a los rivales","Objetivo: saltar 5"]
@@ -272,6 +290,12 @@ def jugar(pantalla):
 
             while corriendo:
                 tiempoJuego += clock.get_time()
+
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        corriendo = False
+                        pygame.quit()
+                        sys.exit()
 
                 if manejoEvento():
                     corriendo = False

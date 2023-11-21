@@ -30,6 +30,8 @@ ultimoOponenteX = 0
 pygame.mixer.init()
 cancion_menu = pygame.mixer.Sound("assets/campeones.wav")  
 cancion_juego = pygame.mixer.Sound("assets/entreno.wav")  
+cancion_ganar = pygame.mixer.Sound("assets/cumbia.wav")  
+cancion_perder = pygame.mixer.Sound("assets/perder.mp3")
 
 # Definición global de cargoImagen
 def cargoImagen(ruta, dimensiones):
@@ -120,6 +122,9 @@ def jugar(pantalla):
         def reiniciarJuego():  #funcion reinicio el juego
             global messiX, messiY, suelo, oponentes, gravedad, salta, saltando, puntos, velocidadOponentes, tiempoJuego, corriendo, enElAire, finDelJuego,ultimoOponenteX
 
+            cancion_ganar.stop()
+            cancion_juego.play(loops=-1)
+
             messiX = 50
             messiY = 310
             suelo = pygame.Rect(0, 450, ANCHO, 15)
@@ -133,11 +138,14 @@ def jugar(pantalla):
             corriendo = True
             enElAire = False
             finDelJuego = False
-            ultimoOponenteX = 0  # Agregar esta línea para inicializar la variable      
+            ultimoOponenteX = 0  # Agregar esta línea para inicializar la variable    
 
         
         def victoria_y_reinicio():
             global finDelJuego, corriendo, puntos
+
+            cancion_juego.stop()
+            cancion_ganar.play(loops=-1)
 
             posiciones_raton = pygame.mouse.get_pos()
             finDelJuego = True
@@ -173,9 +181,15 @@ def jugar(pantalla):
                             esperandoAccion = False
                             finDelJuego = False
                             reiniciarJuego()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if boton_volver.verificar_entrada(posiciones_raton):
+                            menu_principal(pantalla)
 
         def perder_y_reiniciar(surface):
             global finDelJuego, corriendo, puntos
+
+            cancion_juego.stop()
+            cancion_perder.play()
 
             finDelJuego = True
 
@@ -215,6 +229,9 @@ def jugar(pantalla):
                             esperandoAccion = False
                             finDelJuego = False
                             reiniciarJuego()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if boton_volver.verificar_entrada(posiciones_raton):
+                            menu_principal(pantalla)
 
         def mostrar_instrucciones():
             instrucciones = ["AYUDA A MESSI A GANAR LA COPA","Salta a los rivales","Objetivo: saltar 5"]
@@ -262,8 +279,8 @@ def jugar(pantalla):
                 manejoSalto()
                 moverOponentes()
 
-                if puntos == 5:
-                    victoria_y_reinicio()
+                if puntos == 1:
+                    victoria_y_reinicio() 
 
                 if finDelJuego and not puntos == 6:
                     perder_y_reiniciar(surface)
@@ -330,10 +347,10 @@ def menu_principal():
 
     fondo = pygame.image.load("assets/Background.png")
 
+    cancion_menu.play(loops=-1)
+
     while True:
         pantalla.blit(fondo, (0, 0))
-
-        cancion_menu.play(loops=-1)
 
         posiciones_raton = pygame.mouse.get_pos()
 

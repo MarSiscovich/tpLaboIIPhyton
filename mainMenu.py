@@ -231,14 +231,14 @@ def jugar(pantalla):
             esperandoAccion = True
             while esperandoAccion:
                 
-            posiciones_raton = pygame.mouse.get_pos()     
+                posiciones_raton = pygame.mouse.get_pos()     
             boton_volver = Boton(imagen=None, posicion=(640, 650),
                                 entrada_texto="BACK TO MENU", fuente=obtener_fuente(50), color_base="WHITE", color_hover="BLACK")
             boton_volver.cambiar_color(posiciones_raton)
             boton_volver.actualizar(surface)
             pygame.display.update()
             
-                for event in pygame.event.get():
+            for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         corriendo = False
                         esperandoAccion = False

@@ -3,7 +3,7 @@ import sys
 import random
 import pygame.mixer
 
-from libreria import Boton, obtener_fuente
+from libreria import Boton, obtener_fuente, reproducir_video
 
 # variables globales
 ANCHO = 1280
@@ -27,10 +27,9 @@ enElAire = False
 finDelJuego = False
 ultimoOponenteX = 0
 
-#Cargo las canciones
 pygame.mixer.init()
-cancion_menu = pygame.mixer.Sound("assets/Marito-Muchachos_-ahora-solo-queda-festejar-_Ya-Somos-Campeon-Mundial_.wav")  
-cancion_juego = pygame.mixer.Sound("assets/Hora-de-Entrenar-Música-para-el-Deporte.wav")  
+cancion_menu = pygame.mixer.Sound("assets/campeones.wav")  
+cancion_juego = pygame.mixer.Sound("assets/entreno.wav")  
 
 # Definición global de cargoImagen
 def cargoImagen(ruta, dimensiones):
@@ -42,12 +41,11 @@ def jugar(pantalla):
     ruta_imagenes_oponentes = ["pics/mbappe.png", "pics/brasil.png", "pics/francia.png", "pics/arabia.png", "pics/australia.png", "pics/croacia.png", "pics/holanda.png", "pics/mexico.png", "pics/polonia.png"]
     imagenes_oponentes = [cargoImagen(ruta, (50, 50)) for ruta in ruta_imagenes_oponentes]
 
-    
-    #Cancion del juego
+    cancion_menu.stop()
     cancion_juego.play(loops=-1)
 
     while True:
-        # Resto de tu código
+
         def inicializoJuego(): #funcion inicializar juego
             pygame.init()
             surface = pygame.display.set_mode((ANCHO, ALTO))
@@ -135,17 +133,125 @@ def jugar(pantalla):
             corriendo = True
             enElAire = False
             finDelJuego = False
-            ultimoOponenteX = 0  # Agregar esta línea para inicializar la variable
+            ultimoOponenteX = 0  # Agregar esta línea para inicializar la variable      
+
+        
+        def victoria_y_reinicio():
+            global finDelJuego, corriendo, puntos
+
+            posiciones_raton = pygame.mouse.get_pos()
+            finDelJuego = True
+
+            textoWIN = obtener_fuente(40).render("MESSI CONSIGUIÓ LA COPA", True, "#b68f40")
+            rectWIN = textoWIN.get_rect(center=(640, 100))
+            pantalla.blit(textoWIN, rectWIN)
+
+            reinicio = obtener_fuente(25).render("PULSE R PARA REINICIAR", True, "#b68f40")
+            rectReinicio = reinicio.get_rect(center=(640, 200))
+            pantalla.blit(reinicio, rectReinicio)
+
+            pygame.display.flip()
+
+            boton_volver = Boton(imagen=None, posicion=(640, 650), 
+                                        entrada_texto="BACK TO MENU", fuente=obtener_fuente(50), color_base="WHITE", color_hover="BLACK")
+
+            boton_volver.cambiar_color(posiciones_raton)
+            boton_volver.actualizar(pantalla)
+
+            pygame.display.update()
+
+            reproducir_video()
+
+            esperandoAccion = True
+            while esperandoAccion:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        corriendo = False
+                        esperandoAccion = False
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_r:
+                            esperandoAccion = False
+                            finDelJuego = False
+                            reiniciarJuego()
+
+        def perder_y_reiniciar(surface):
+            global finDelJuego, corriendo, puntos
+
+            finDelJuego = True
+
+            posiciones_raton = pygame.mouse.get_pos()
+
+            textoGameOver = obtener_fuente(90).render("GAME OVER", True, "#b68f40")
+            rectGameOver = textoGameOver.get_rect(center=(640, 100))
+            pantalla.blit(textoGameOver, rectGameOver)
+
+            reinicio = obtener_fuente(25).render("PULSE R PARA REINICIAR", True, "#b68f40")
+            rectReinicio = reinicio.get_rect(center=(640, 200))
+            pantalla.blit(reinicio, rectReinicio)
+
+            mensajePuntuacion = obtener_fuente(15).render(f"Puntuación Final: {puntos}", True, "#b68f40")
+            x_pos = ANCHO // 2 - mensajePuntuacion.get_width() // 2
+            y_pos = 250
+            surface.blit(mensajePuntuacion, (x_pos, y_pos))
+
+            pygame.display.flip()
+
+            boton_volver = Boton(imagen=None, posicion=(640, 650),
+                                entrada_texto="BACK TO MENU", fuente=obtener_fuente(50), color_base="WHITE", color_hover="BLACK")
+
+            boton_volver.cambiar_color(posiciones_raton)
+            boton_volver.actualizar(pantalla)
+
+            pygame.display.update()
+
+            esperandoAccion = True
+            while esperandoAccion:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        corriendo = False
+                        esperandoAccion = False
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_r:
+                            esperandoAccion = False
+                            finDelJuego = False
+                            reiniciarJuego()
+
+        def mostrar_instrucciones():
+            instrucciones = ["AYUDA A MESSI A GANAR LA COPA","Salta a los rivales","Objetivo: saltar 5"]
+            tiempo_inicio = pygame.time.get_ticks()
+
+            fondoCopa = cargoImagen("pics/fondoCopa.jpg",(ANCHO, ALTO))
+            pantalla.blit(fondoCopa, (0, 0))
+
+            while pygame.time.get_ticks() - tiempo_inicio < 3000: 
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                y_pos = 100 
+                for instr in instrucciones:
+                    texto_instr = obtener_fuente(25).render(instr, True, "WHITE")
+                    rect_instr = texto_instr.get_rect(center=(900, y_pos))
+                    pantalla.blit(texto_instr, rect_instr)
+                    y_pos += 75
+
+                pygame.display.flip()
+
+            pygame.time.delay(1000)
+            
 
         def main():
             global messiX, messiY, suelo, oponentes, gravedad, salta, saltando, puntos, velocidadOponentes, tiempoJuego, corriendo, enElAire, finDelJuego, ultimoOponenteX
 
             surface, clock, font = inicializoJuego()
-            pygame.display.set_caption("JUEGO Scaloneta")  # título a ventana
+            pygame.display.set_caption("JUEGO Scaloneta")  
 
             fondo = cargoImagen("pics/back.png", (ANCHO, ALTO))
             messi = cargoImagen("pics/messiRun.png", (150, 160))
             suelo = pygame.Rect(0, 450, ANCHO, 15)
+
+            mostrar_instrucciones()
 
             while corriendo:
                 tiempoJuego += clock.get_time()
@@ -156,54 +262,18 @@ def jugar(pantalla):
                 manejoSalto()
                 moverOponentes()
 
-                if finDelJuego:
+                if puntos == 5:
+                    victoria_y_reinicio()
 
-                    posiciones_raton = pygame.mouse.get_pos()
+                if finDelJuego and not puntos == 6:
+                    perder_y_reiniciar(surface)
 
-                    textoGameOver = obtener_fuente(90).render("GAME OVER", True, "#b68f40")
-                    rectGameOver = textoGameOver.get_rect(center=(640, 100))
-                    pantalla.blit(textoGameOver, rectGameOver)
-
-                    reinicio = obtener_fuente(25).render("PULSE R PARA REINICIAR", True, "#b68f40")
-                    rectReinicio = reinicio.get_rect(center=(640,200))
-                    pantalla.blit(reinicio, rectReinicio)
-
-                    mensajePuntuacion = obtener_fuente(15).render(f"Puntuación Final: {puntos}", True, "#b68f40")
-                    x_pos = ANCHO // 2 - mensajePuntuacion.get_width() // 2
-                    y_pos = 250
-                    surface.blit(mensajePuntuacion, (x_pos, y_pos))
-
-                    """
-                    botonVolverJuego = Boton(imagen=None, posicion=(640, 650), 
-                                                entrada_texto="BACK TO MENU", fuente=obtener_fuente(50), color_base="#b68f40", color_hover="Black")
-
-                    botonVolverJuego.cambiar_color(posiciones_raton)
-                    botonVolverJuego.actualizar(pantalla)
-
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        if botonVolverJuego.verificar_entrada(posiciones_raton):
-                            return  
-                    """
-                    pygame.display.flip()
-
-                    esperandoAccion = True
-                    while esperandoAccion:
-                        for event in pygame.event.get():
-                            if event.type == pygame.QUIT:
-                                corriendo = False
-                                esperandoAccion = False
-                            if event.type == pygame.KEYDOWN:
-                                if event.key == pygame.K_r:
-                                    esperandoAccion = False
-                                    finDelJuego = False
-                                    reiniciarJuego()
 
                 mostrarPantalla(surface, fondo, messi, suelo, font)
 
                 pygame.display.flip()
                 clock.tick(30)
 
-            pygame.mixer.stop()
             pygame.quit()
             sys.exit()
 
@@ -214,31 +284,42 @@ def jugar(pantalla):
         
         pygame.display.update()
 
+def creditos(pantalla):
 
-def opciones(pantalla):
+    pygame.display.set_caption("OPCIONES Scaloneta")  # título a ventana
+
+    nombres_participantes = ["Martina Siscovich", "Damian Cabral", "Santiago Rodriguez Spina", "Quimey Polimeni","Aliz Tovar", "MESSI TE AMAMOS"] 
+
     while True:
         posiciones_raton = pygame.mouse.get_pos()
 
-        pantalla.fill("white")
+        fondoCreditos = cargoImagen("pics/fondoCreditos.jpg", (ANCHO, ALTO))
+        pantalla.blit(fondoCreditos, (0, 0))
 
-        texto_opciones = obtener_fuente(45).render("This is the OPTIONS screen.", True, "Black")
-        rectangulo_opciones = texto_opciones.get_rect(center=(640, 260))
-        pantalla.blit(texto_opciones, rectangulo_opciones)
+        texto_creditos = obtener_fuente(60).render("CREDITS", True, "WHITE")
+        rectangulo_creditos = texto_creditos.get_rect(center=(640, 100))
+        pantalla.blit(texto_creditos, rectangulo_creditos)
 
-        boton_volver_opciones = Boton(imagen=None, posicion=(640, 460), 
-                                      entrada_texto="BACK", fuente=obtener_fuente(75), color_base="Black", color_hover="Green")
+        y_pos = 200 
+        for nombre in nombres_participantes:
+            texto_nombre = obtener_fuente(30).render(nombre, True, "WHITE")
+            rectangulo_nombre = texto_nombre.get_rect(center=(640, y_pos))
+            pantalla.blit(texto_nombre, rectangulo_nombre)
+            y_pos += 75
+       
+        boton_volver_creditos = Boton(imagen=None, posicion=(640, 650), 
+                                      entrada_texto="BACK TO MENU", fuente=obtener_fuente(50), color_base="WHITE", color_hover="BLACK")
 
-        boton_volver_opciones.cambiar_color(posiciones_raton)
-        boton_volver_opciones.actualizar(pantalla)
+        boton_volver_creditos.cambiar_color(posiciones_raton)
+        boton_volver_creditos.actualizar(pantalla)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.mixer.stop()
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if boton_volver_opciones.verificar_entrada(posiciones_raton):
-                    return 
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if boton_volver_creditos.verificar_entrada(posiciones_raton):
+                    return
 
         pygame.display.update()
 
@@ -249,11 +330,10 @@ def menu_principal():
 
     fondo = pygame.image.load("assets/Background.png")
 
-    #Cancion del menu
-    cancion_menu.play(loops=-1)
-
     while True:
         pantalla.blit(fondo, (0, 0))
+
+        cancion_menu.play(loops=-1)
 
         posiciones_raton = pygame.mouse.get_pos()
 
@@ -262,30 +342,27 @@ def menu_principal():
 
         boton_jugar = Boton(imagen=pygame.image.load("assets/Play Rect.png"), posicion=(640, 250), 
                             entrada_texto="PLAY", fuente=obtener_fuente(75), color_base="#d7fcd4", color_hover="White")
-        boton_opciones = Boton(imagen=pygame.image.load("assets/Options Rect.png"), posicion=(640, 400), 
-                               entrada_texto="OPTIONS", fuente=obtener_fuente(75), color_base="#d7fcd4", color_hover="White")
+        boton_creditos = Boton(imagen=pygame.image.load("assets/Options Rect.png"), posicion=(640, 400), 
+                               entrada_texto="CREDITS", fuente=obtener_fuente(75), color_base="#d7fcd4", color_hover="White")
         boton_salir = Boton(imagen=pygame.image.load("assets/Quit Rect.png"), posicion=(640, 550), 
                             entrada_texto="QUIT", fuente=obtener_fuente(75), color_base="#d7fcd4", color_hover="White")
 
         pantalla.blit(texto_menu_principal, rectangulo_menu_principal)
 
-        for boton in [boton_jugar, boton_opciones, boton_salir]:
+        for boton in [boton_jugar, boton_creditos, boton_salir]:
             boton.cambiar_color(posiciones_raton)
             boton.actualizar(pantalla)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.mixer.stop()
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if boton_jugar.verificar_entrada(posiciones_raton):
-                   pygame.mixer.stop() 
-                   jugar(pantalla)
-                if boton_opciones.verificar_entrada(posiciones_raton):
-                    opciones(pantalla)
+                    jugar(pantalla)
+                if boton_creditos.verificar_entrada(posiciones_raton):
+                    creditos(pantalla)
                 if boton_salir.verificar_entrada(posiciones_raton):
-                    pygame.mixer.stop()
                     pygame.quit()
                     sys.exit()
 
